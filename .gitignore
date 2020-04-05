@@ -1,2 +1,8 @@
-#ignore the General project
-General/*
+#ignore all files
+*.*
+
+#except source files
+!*.cpp
+!*.hpp
+!*.c
+!*.h
