@@ -24,11 +24,6 @@ int getGCD(int lhs, int rhs)
 	return lhs + rhs;
 }
 
-int getLCM(int lhs, int rhs) 
-{
-	return (lhs * rhs) / getGCD(lhs, rhs);
-}
-
 class Rational {
 public:
 	Rational() {
@@ -96,7 +91,7 @@ Rational operator*(const Rational& lhs, const Rational& rhs)
 
 Rational operator/(const Rational& lhs, const Rational& rhs)
 {
-	return Rational(lhs.Numerator() * rhs.Denominator(), rhs.Numerator() * lhs.Denominator());
+	return lhs * Rational(rhs.Denominator(), rhs.Numerator());
 }
 
 Rational operator-(const Rational& lhs, const Rational& rhs)
@@ -106,10 +101,9 @@ Rational operator-(const Rational& lhs, const Rational& rhs)
 
 bool operator==(const Rational& lhs, const Rational& rhs)
 {
-	int lcm = getLCM(lhs.Denominator(), rhs.Denominator());
-	int lnum = lhs.Numerator() * (lcm / lhs.Denominator());
-	int rnum = rhs.Numerator() * (lcm / rhs.Denominator());
-	return lnum == rnum;
+	
+	return (lhs.Numerator() == rhs.Numerator())
+		&& (lhs.Denominator() == rhs.Denominator());
 }
 
 bool operator!=(const Rational& lhs, const Rational& rhs)
@@ -121,13 +115,13 @@ istream& operator>>(istream& input, Rational& r)
 {
 	int num = 0;
 	int denom = 0;
+	char delim = 0;
 
 	if( input)
 	{
-		input >> num;
-		input.ignore(1);
-		input >> denom;
-		r = Rational(num, denom);
+		input >> num >> delim >> denom;
+		if( input && delim == '/')
+			r = Rational(num, denom);
 	}
 	
 	return input;
@@ -142,10 +136,7 @@ ostream& operator<<(ostream& output, const Rational& r)
 
 bool operator<(const Rational& lhs, const Rational& rhs)
 {
-	int lcm = getLCM(lhs.Denominator(), rhs.Denominator());
-	int lnum = lhs.Numerator() * (lcm / lhs.Denominator());
-	int rnum = rhs.Numerator() * (lcm / rhs.Denominator());
-	return lnum < rnum;
+	return (lhs - rhs).Numerator() < 0;
 }
 
 int main() 
@@ -285,7 +276,7 @@ int main()
 		correct = r1 == Rational(5, 7) && r2 == Rational(5, 4);
 		if (!correct) {
 			cout << "Read from empty stream shouldn't change arguments: " << r1 << " " << r2 << endl;
-			//return 4;
+			return 4;
 		}
 	}
 
