@@ -32,6 +32,10 @@ public:
 	}
 
 	Rational(int numerator, int denominator) {
+		if (!denominator)
+		{
+			throw invalid_argument(string(numerator + "/" + denominator));
+		}
 		if (!numerator)
 		{
 			m_numerator = 0;
@@ -91,6 +95,10 @@ Rational operator*(const Rational& lhs, const Rational& rhs)
 
 Rational operator/(const Rational& lhs, const Rational& rhs)
 {
+	if (!rhs.Numerator())
+	{
+		throw domain_error("zero division");
+	}
 	return lhs * Rational(rhs.Denominator(), rhs.Numerator());
 }
 
@@ -309,6 +317,24 @@ int main()
 			return 3;
 		}
 	}
+
+	try {
+		Rational r(1, 0);
+		cout << "Doesn't throw in case of zero denominator" << endl;
+		return 1;
+	}
+	catch (invalid_argument&) {
+	}
+
+	try {
+		auto x = Rational(1, 2) / Rational(0, 1);
+		cout << "Doesn't throw in case of division by zero" << endl;
+		return 2;
+	}
+	catch (domain_error&) {
+	}
+
+	cout << "OK" << endl;
 
 	cout << "OK" << endl;
 	return 0;
