@@ -72,6 +72,17 @@ void DataBase::Delete(const Date& date, const string& ev)
 			}
 		}		
 	}
+	else
+	{
+		if (ev.empty())
+		{
+			cout << "Deleted 0 events" << endl;
+		}
+		else
+		{
+			cout << "Event not found" << endl;
+		}		
+	}
 }
 
 void DataBase::Find(const Date& date) const
@@ -101,6 +112,11 @@ istream& EnsureDateSeparator(istream& in_stream, const string& data)
 	if (in_stream.peek() == '-')
 	{
 		in_stream.ignore(1);
+
+		if (in_stream.peek() == EOF)
+		{
+			throw invalid_argument("Wrong date format: " + data);
+		}		
 	}
 	else
 	{
@@ -130,7 +146,7 @@ istream& operator>>(istream& in_stream, Date& out_date)
 		throw invalid_argument("Wrong date format: " + data);
 	}
 
-	if (date.month > 12 || date.month < 0)
+	if (date.month > 12 || date.month < 1)
 	{
 		throw invalid_argument("Month value is invalid: " + to_string(date.month));
 	}
