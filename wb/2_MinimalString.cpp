@@ -1,3 +1,6 @@
+/*
+Print the smallest lexicographically string
+*/
 #include <iostream>
 #include <set>
 #include <string>

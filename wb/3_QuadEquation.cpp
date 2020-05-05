@@ -1,3 +1,7 @@
+/*
+Solve the eqaution
+*/
+
 #include <iostream>
 #include <cmath>
 
@@ -15,7 +19,6 @@ int main()
 
 	discr = (b * b) - (4 * a * c);
 
-	//std::cout << "discr = " << discr << std::endl;
 
 	if (!a)
 	{

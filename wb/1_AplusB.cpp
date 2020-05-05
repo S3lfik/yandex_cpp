@@ -1,3 +1,6 @@
+/*
+Print a sum of A and B
+*/
 #include <iostream>
 
 int main()
