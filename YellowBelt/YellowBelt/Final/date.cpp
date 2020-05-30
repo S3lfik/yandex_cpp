@@ -1,10 +1,9 @@
-#include "Date.h"
-#include <sstream>
+#include "date.h"
 #include <iomanip>
 
 using namespace std;
 
-istream& EnsureDateSeparator(istream& in_stream, const string& data)
+istream& EnsureDateSeparator(istream& in_stream, const std::string& data)
 {
 	if (in_stream.peek() == '-')
 	{
@@ -23,7 +22,7 @@ istream& EnsureDateSeparator(istream& in_stream, const string& data)
 	return in_stream;
 }
 
-istream& operator>>(istream& in_stream, Date& out_date)
+std::istream& operator>>(std::istream& in_stream, Date& out_date)
 {
 	string data;
 	in_stream >> data;
@@ -57,15 +56,49 @@ istream& operator>>(istream& in_stream, Date& out_date)
 	return in_stream;
 }
 
-bool operator<(const Date& rhs, const Date& lhs)
-{
-	int rsum = rhs.year * 31 * 12 + rhs.month * 31 + rhs.day;
-	int lsum = lhs.year * 31 * 12 + lhs.month * 31 + lhs.day;
-	return rsum < lsum;
-}
-
-ostream& operator<<(ostream& output, const Date& data)
+std::ostream& operator<<(std::ostream& output, const Date& data)
 {
 	output << setw(4) << setfill('0') << data.year << "-" << setw(2) << data.month << "-" << setw(2) << data.day;
 	return output;
+}
+
+bool operator==(const Date& lhs, const Date& rhs)
+{
+	return lhs.year == rhs.year &&
+		lhs.month == rhs.month &&
+		lhs.day == rhs.day;
+}
+
+bool operator!=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs == rhs);
+}
+
+bool operator<(const Date& lhs, const Date& rhs)
+{
+	int rsum = rhs.year * 31 * 12 + rhs.month * 31 + rhs.day;
+	int lsum = lhs.year * 31 * 12 + lhs.month * 31 + lhs.day;
+	return lsum < rsum;
+}
+
+bool operator>(const Date& lhs, const Date& rhs)
+{
+	return rhs < lhs;
+}
+
+bool operator<=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs > rhs);
+}
+
+bool operator>=(const Date& lhs, const Date& rhs)
+{
+	return !(lhs < rhs);
+}
+
+Date ParseDate(std::istream& data)
+{
+	Date date;
+	data >> date;
+	return date;
 }

@@ -1,73 +1,49 @@
 #include "database.h"
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-void DataBase::Add(const Date& date, const string& ev)
+void Database::Add(const Date& date, const string& ev)
 {
 	if (!ev.empty())
 	{
-		data[date].insert(ev);
+		if (!data[date].first.count(ev))
+		{
+			std::cerr << "Debug: Add " << Entry{ date, ev } << endl;
+			data[date].first.insert(ev);
+			data[date].second.push_back(ev);
+		}
 	}
 }
 
-void DataBase::Delete(const Date& date, const string& ev)
+Entry Database::Last(const Date& date) const
 {
-	if (data.count(date))
-	{
-		if (ev.empty())
-		{
-			size_t removeCount = data[date].size();
-			data.erase(date);
-			cout << "Deleted " << removeCount << " events" << endl;
-		}
-		else
-		{
-			size_t erased = 0;
+	std::cerr << "Debug: Last " << date << endl;
+	auto last = data.upper_bound(date);
 
-			erased = data[date].erase(ev);
-
-			if (erased)
-			{
-				cout << "Deleted successfully" << endl;
-			}
-			else
-			{
-				cout << "Event not found" << endl;
-			}
-		}
-	}
-	else
+	if (last == data.begin())
 	{
-		if (ev.empty())
-		{
-			cout << "Deleted 0 events" << endl;
-		}
-		else
-		{
-			cout << "Event not found" << endl;
-		}
+		throw invalid_argument("");
 	}
+	--last;
+	std::cerr << "Debug: Last: " << Entry{last->first, last->second.second[last->second.second.size() - 1]} << endl;
+	return {last->first, last->second.second[last->second.second.size() - 1]};
 }
 
-void DataBase::Find(const Date& date) const
-{
-	if (data.count(date))
-	{
-		for (auto ev : data.at(date))
-		{
-			cout << ev << endl;
-		}
-	}
-}
-
-void DataBase::Print() const
+void Database::Print(std::ostream& os) const
 {
 	for (auto date : data)
 	{
-		for (auto ev : date.second)
+		for (auto ev : date.second.second)
 		{
-			cout << date.first << " " << ev << endl;
+			os << Entry{date.first, ev} << endl;
 		}
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const Entry& entry)
+{
+	os << entry.date << " " << entry.event;
+	return os;
 }

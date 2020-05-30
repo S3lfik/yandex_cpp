@@ -6,11 +6,17 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
+#include <fstream>
 
 using namespace std;
 
 string ParseEvent(istream& is) {
   // Реализуйте эту функцию
+	string data;
+	is >> std::ws;
+	getline(is, data);
+	return data;
 }
 
 void TestAll();
@@ -20,7 +26,9 @@ int main() {
 
   Database db;
 
-  for (string line; getline(cin, line); ) {
+  ifstream file("Final/input.txt");
+
+  for (string line; getline(file, line); ) {
     istringstream is(line);
 
     string command;
