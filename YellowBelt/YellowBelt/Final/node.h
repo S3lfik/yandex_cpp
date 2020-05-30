@@ -3,9 +3,6 @@
 #include <memory>
 #include "date.h"
 
-struct Entity
-{};
-
 enum Comparison
 {
 	NotEqual = 0,

@@ -26,7 +26,7 @@ bool ValueCompare(Comparison comp, const Value& lhs, const Value& rhs)
 
 	bool EmptyNode::Evaluate(const Date& date, const std::string& event) const
 	{
-		return false;
+		return true;
 	}
 
 	DateComparisonNode::DateComparisonNode(Comparison comp, const Date& date)

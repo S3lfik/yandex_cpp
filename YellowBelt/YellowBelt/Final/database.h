@@ -6,14 +6,7 @@
 #include <ostream>
 #include <algorithm>
 
-#include "date.h"
-
-struct Entry
-{
-	Date date;
-	std::string event;
-};
-
+#include "entity.h"
 
 class Database
 {
@@ -21,32 +14,33 @@ public:
 	void Add(const Date& date, const std::string& ev);
 
 	template<class Predicate>
-	std::vector<Entry> FindIf(Predicate predicate) const;
+	std::vector<Entity> FindIf(Predicate predicate) const;
 
 	template<class Predicate>
 	unsigned RemoveIf(Predicate predicate);
 
-	Entry Last(const Date& date) const;
+	Entity Last(const Date& date) const;
 
 	void Print(std::ostream & os) const;
 
 private:
-	std::map <Date, std::pair<std::set<std::string> , std::vector<std::string>>> data;
+	std::map <Date, std::vector< std::set< std::string>::const_iterator > > eventsIndex;
+	std::map <Date, std::set< std::string > > data;
 };
 
-std::ostream& operator<<(std::ostream& os, const Entry& entry);
+std::ostream& operator<<(std::ostream& os, const Entity& entry);
 
 template<class Predicate>
-std::vector<Entry> Database::FindIf(Predicate predicate) const
+std::vector<Entity> Database::FindIf(Predicate predicate) const
 {
-	std::vector<Entry> result;
-	for (const auto& entry : data)
+	std::vector<Entity> result;
+	for (const auto& index : eventsIndex)
 	{
-		for (const auto& ev : entry.second.second)
+		for (const auto& ev : index.second)
 		{
-			if (predicate(entry.first, ev))
+			if (predicate(index.first, *ev))
 			{
-				result.push_back({ entry.first, ev });
+				result.push_back({ index.first, *ev });
 			}
 		}
 	}
@@ -59,37 +53,27 @@ unsigned Database::RemoveIf(Predicate predicate)
 {
 	unsigned delCount = 0;
 	std::vector<Date> datesWithNoEvents;
-	for (auto& entry : data)
+	for (auto& entity : eventsIndex)
 	{
-		auto itr = --entry.second.second.end();
-		auto partitionIt = entry.second.second.end();
-		while ("madness")
+		auto partitionIt = std::stable_partition(entity.second.begin(), entity.second.end(), 
+			[&entity, predicate](const std::set< std::string>::const_iterator& evIt)
 		{
-			if (predicate(entry.first, *itr))
-			{
-				std::cerr << "Debug: RemoveIf removed: " << entry.first << *itr << std::endl;
-				entry.second.first.erase(*itr);
-				partitionIt = std::stable_partition(entry.second.second.begin(), partitionIt, 
-					[itr](const std::string& str)
-				{
-					return str == *itr;
-				});
-				++delCount;
-			}
+			return predicate(entity.first, *evIt);
+		});
 
-			if (itr != entry.second.second.begin())
-			{
-				--itr;
-			}
-			else
-				break;
+		delCount += partitionIt - entity.second.begin();
+
+		for (auto itr = entity.second.begin(); itr != partitionIt; ++itr)
+		{
+			data.at(entity.first).erase(*itr);
 		}
-		entry.second.second.erase(partitionIt, entry.second.second.end());
 
-		// Store a date to be removed if it has no events left
-		if (entry.second.first.empty())
+		entity.second.erase(entity.second.begin(), partitionIt);
+
+		// Mark a date with no events as empty and pending to remove
+		if (data.at(entity.first).empty())
 		{
-			datesWithNoEvents.push_back(entry.first);
+			datesWithNoEvents.push_back(entity.first);
 		}
 	}
 
@@ -97,6 +81,7 @@ unsigned Database::RemoveIf(Predicate predicate)
 	for (const auto& emptyDate : datesWithNoEvents)
 	{
 		data.erase(emptyDate);
+		eventsIndex.erase(emptyDate);
 	}
 
 	return delCount;

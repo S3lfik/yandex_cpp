@@ -8,42 +8,37 @@ void Database::Add(const Date& date, const string& ev)
 {
 	if (!ev.empty())
 	{
-		if (!data[date].first.count(ev))
+		auto insertRet = data[date].insert(ev);
+		if(insertRet.second)
 		{
-			std::cerr << "Debug: Add " << Entry{ date, ev } << endl;
-			data[date].first.insert(ev);
-			data[date].second.push_back(ev);
+			eventsIndex[date].push_back(insertRet.first);
 		}
 	}
 }
 
-Entry Database::Last(const Date& date) const
+Entity Database::Last(const Date& date) const
 {
 	std::cerr << "Debug: Last " << date << endl;
-	auto last = data.upper_bound(date);
+	auto last = eventsIndex.upper_bound(date);
 
-	if (last == data.begin())
+	if (last == eventsIndex.begin())
 	{
 		throw invalid_argument("");
 	}
 	--last;
-	std::cerr << "Debug: Last: " << Entry{last->first, last->second.second[last->second.second.size() - 1]} << endl;
-	return {last->first, last->second.second[last->second.second.size() - 1]};
+	std::cerr << "Debug: Last: " << Entity{ last->first, *last->second.back() };
+	
+	return { last->first, *last->second.back() };
 }
 
 void Database::Print(std::ostream& os) const
 {
-	for (auto date : data)
+	for (auto date : eventsIndex)
 	{
-		for (auto ev : date.second.second)
+		for (auto ev : date.second)
 		{
-			os << Entry{date.first, ev} << endl;
+			os << Entity{date.first, *ev} << endl;
 		}
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const Entry& entry)
-{
-	os << entry.date << " " << entry.event;
-	return os;
-}

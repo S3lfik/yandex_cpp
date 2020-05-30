@@ -28,7 +28,7 @@ int main() {
 
   ifstream file("Final/input.txt");
 
-  for (string line; getline(file, line); ) {
+  for (string line; getline(cin, line); ) {
     istringstream is(line);
 
     string command;
